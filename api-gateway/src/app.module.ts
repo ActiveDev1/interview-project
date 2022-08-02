@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { MongooseModule } from '@nestjs/mongoose'
 import configuration from './config/configuration'
 
 @Module({
@@ -10,6 +11,13 @@ import configuration from './config/configuration'
 			expandVariables: true,
 			load: [configuration],
 			envFilePath: process.env.NODE_ENV === 'development' ? `.env.development` : '.env.prod'
+		}),
+		MongooseModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: async (config: ConfigService) => ({
+				uri: config.get<string>('databases.mongodb.uri')
+			}),
+			inject: [ConfigService]
 		})
 	]
 })
