@@ -17,6 +17,7 @@ const UserRepositoryProvider: Provider = {
 		])
 	],
 	controllers: [UserController],
-	providers: [UserService, UserRepositoryProvider]
+	providers: [UserService, UserRepositoryProvider],
+	exports: [UserService]
 })
 export class UserModule {}

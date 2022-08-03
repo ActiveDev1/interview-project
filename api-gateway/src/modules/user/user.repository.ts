@@ -13,4 +13,12 @@ export class UserRepository
 	constructor(@InjectModel(User.name) readonly model: Model<UserDocument>) {
 		super(model)
 	}
+
+	async findOneByUsername(username: string): Promise<UserDocument> {
+		return await super.findOne({ username })
+	}
+
+	async updateOne(id: string, update: Partial<User>): Promise<User> {
+		return await super.update(id, { $set: update })
+	}
 }
