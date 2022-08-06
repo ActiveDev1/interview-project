@@ -1,10 +1,9 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+import { HttpException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Client, ClientNats, Transport } from '@nestjs/microservices'
 import { Client as NatsClient, NatsMsg } from '@nestjs/microservices/external/nats-client.interface'
 import * as _ from 'lodash'
 import { createInbox } from 'nats'
 import { EmptyResponseException } from './errors/empty-response.error'
-import { NatsRequestException } from './errors/request.error'
 import { RequestOptions } from './interfaces/request-options.interface'
 import { Request } from './interfaces/request.interface'
 import { Response } from './interfaces/response.interface'
@@ -33,20 +32,16 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 		request: Request<TInput>,
 		options?: RequestOptions
 	): Promise<TResult> {
-		try {
-			const subject =
-				this.subjectPrefix +
-				(request.namespace ? `-${request.namespace}` : '') +
-				`.REQB.${request.action}`
-			const { dataBuffer, inbox } = this.getRequestData<TInput>(request)
-			const opts = this.getDefaultOptions(options, { inbox, namespace: request.namespace })
+		const subject =
+			this.subjectPrefix +
+			(request.namespace ? `-${request.namespace}` : '') +
+			`.REQB.${request.action}`
+		const { dataBuffer, inbox } = this.getRequestData<TInput>(request)
+		const opts = this.getDefaultOptions(options, { inbox, namespace: request.namespace })
 
-			const reply = await this.natsClient.request(subject, dataBuffer, opts)
+		const reply = await this.natsClient.request(subject, dataBuffer, opts)
 
-			return this.getResponseData(reply)
-		} catch (error) {
-			throw new NatsRequestException()
-		}
+		return this.getResponseData(reply)
 	}
 
 	deserialize<TResult>(reply: NatsMsg) {
@@ -55,7 +50,6 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 
 	private getRequestData<TInput>(request: Request<TInput>) {
 		const inbox = createInbox()
-		// id = generateRandomString()
 
 		const dataBuffer = Buffer.from(
 			JSON.stringify({
@@ -70,7 +64,7 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 	}
 
 	private getResponseData<TResult>(natsMsg: NatsMsg): TResult | null {
-		if (natsMsg.data === null || natsMsg.data.length) {
+		if (natsMsg.data === null || natsMsg.data.length === 0) {
 			throw new EmptyResponseException()
 		}
 
@@ -78,7 +72,7 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 
 		if (!resposne.success) {
 			this.logger.error('Get unsuccessful message from microservice')
-			return null
+			throw new HttpException(resposne.error?.message, resposne.error?.code)
 		}
 
 		return resposne.data ? resposne.data : null
