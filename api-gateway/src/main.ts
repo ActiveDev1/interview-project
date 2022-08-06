@@ -5,6 +5,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module'
 import { RestApiConfig } from './config/configuration'
 import { ValidationException, ValidationFilter } from './shared/filters/validation.filter'
+import { TransformInterceptor } from './shared/interceptors/response-transform.interceptor'
 
 async function bootstrap() {
 	const [logger, prettyPrint] = [process.env.REST_LOGGER, process.env.REST_PRETTY_LOGGER]
@@ -18,6 +19,7 @@ async function bootstrap() {
 	)
 
 	app.setGlobalPrefix('api')
+	app.useGlobalInterceptors(new TransformInterceptor())
 	app.useGlobalFilters(new ValidationFilter())
 	app.useGlobalPipes(
 		new ValidationPipe({
