@@ -1,18 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Patch, UseGuards } from '@nestjs/common'
-import {
-	ApiBearerAuth,
-	ApiConflictResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiParam,
-	ApiTags
-} from '@nestjs/swagger'
+import { ApiTags } from '@nestjs/swagger'
 import { GetIdParam } from '../../.../../shared/dtos/get-id-param.dto'
 import { GetUser } from '../../shared/decorators/get-user.decorator'
 import { Public } from '../../shared/decorators/public.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
+import { DeleteApi, FindOneApi, UpdateApi } from './decorators/user.controller.decorator'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { UserEntity } from './entities/user.entity'
 import { UserDocument } from './schemas/user.schema'
 import { UserService } from './user.service'
 
@@ -24,24 +17,19 @@ export class UserController {
 
 	@Get(':id')
 	@Public()
-	@ApiParam({ name: 'id', required: true, allowEmptyValue: false })
-	@ApiOkResponse({ type: UserEntity })
-	@ApiNotFoundResponse({ description: 'User not found' })
+	@FindOneApi()
 	async findOne(@Param() param: GetIdParam) {
 		return await this.userService.findOne(param.id)
 	}
 
 	@Patch()
-	@ApiBearerAuth('access-token')
-	@ApiOkResponse({ type: UserEntity })
-	@ApiConflictResponse({ description: 'User with this username are exists' })
+	@UpdateApi()
 	async update(@GetUser() user: UserDocument, @Body() body: UpdateUserDto) {
 		return await this.userService.update(user, body)
 	}
 
 	@Delete()
-	@ApiBearerAuth('access-token')
-	@ApiOkResponse({ type: UserEntity })
+	@DeleteApi()
 	async delete(@GetUser() user: UserDocument) {
 		return await this.userService.delete(user._id)
 	}
