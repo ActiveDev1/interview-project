@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
 import { Role } from '../enums/role.enum'
+import { User as IUser } from '../interfaces/user.interface'
 
 type UserDocument = User & Document
 
 @Schema({ versionKey: false, id: true })
-class User {
+class User implements IUser {
 	@Prop({ required: true })
 	name: string
 
@@ -17,6 +18,10 @@ class User {
 
 	@Prop({ required: true, default: Role.USER })
 	role: string
+
+	created_at: number
+
+	updated_at: number
 }
 
 const UserDatabaseName = 'users'

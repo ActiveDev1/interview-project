@@ -6,6 +6,7 @@ import { AppModule } from './app.module'
 import { RestApiConfig } from './config/configuration'
 import { ValidationException, ValidationFilter } from './shared/filters/validation.filter'
 import { TransformInterceptor } from './shared/interceptors/response-transform.interceptor'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
 	const [logger, prettyPrint] = [process.env.REST_LOGGER, process.env.REST_PRETTY_LOGGER]
@@ -33,6 +34,25 @@ async function bootstrap() {
 			}
 		})
 	)
+
+	const configDocument = new DocumentBuilder()
+		.setTitle('UserManagment Service')
+		.setDescription('The UserManagment APIs document')
+		.setVersion('1.0')
+		.addBearerAuth(
+			{
+				description: `Please enter token in following format: Bearer <JWT>`,
+				name: 'Authorization',
+				bearerFormat: 'Bearer',
+				scheme: 'Bearer',
+				type: 'http',
+				in: 'Header'
+			},
+			'access-token'
+		)
+		.build()
+	const document = SwaggerModule.createDocument(app, configDocument)
+	SwaggerModule.setup('api-doc', app, document)
 
 	const { host, port } = app.get(ConfigService).get<RestApiConfig>('server.restApi')
 
