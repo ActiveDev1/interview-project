@@ -2,6 +2,6 @@ import { HttpException, HttpStatus } from '@nestjs/common'
 
 export class DuplicateUsername extends HttpException {
 	constructor() {
-		super('Duplicate username', HttpStatus.CONFLICT)
+		super('User with this username are exists', HttpStatus.CONFLICT)
 	}
 }
