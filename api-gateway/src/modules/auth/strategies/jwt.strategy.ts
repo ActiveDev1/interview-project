@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common'
 import { FastifyRequest } from 'fastify'
-import { NatsService } from 'src/modules/services/nats/nats.service'
+import { NatsService } from '../../../modules/services/nats/nats.service'
 import { UserDocument } from '../../../modules/user/schemas/user.schema'
 
 export type strategyType = 'jwt-access' | 'jwt-refresh'

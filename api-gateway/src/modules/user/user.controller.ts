@@ -7,8 +7,8 @@ import {
 	ApiParam,
 	ApiTags
 } from '@nestjs/swagger'
-import { GetUser } from 'src/shared/decorators/get-user.decorator'
 import { GetIdParam } from '../../.../../shared/dtos/get-id-param.dto'
+import { GetUser } from '../../shared/decorators/get-user.decorator'
 import { Public } from '../../shared/decorators/public.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
 import { UpdateUserDto } from './dto/update-user.dto'

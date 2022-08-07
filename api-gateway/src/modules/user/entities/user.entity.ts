@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger'
-import { getNow } from 'src/shared/utils/functions'
+import { getNow } from '../../../shared/utils/functions'
 import { User } from '../interfaces/user.interface'
 
 export class UserEntity implements User {

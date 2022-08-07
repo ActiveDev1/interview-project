@@ -1,5 +1,5 @@
 import fastify from 'fastify'
-import { UserDocument } from 'src/modules/user/schemas/user.schema'
+import { UserDocument } from '../../modules/user/schemas/user.schema'
 
 declare module 'fastify' {
 	interface FastifyRequest {
