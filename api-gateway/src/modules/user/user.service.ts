@@ -34,7 +34,7 @@ export class UserService {
 	async findOne(id: string): Promise<UserDocument> {
 		const user = await this.userRepository.findById(id)
 
-		if (user) {
+		if (!user) {
 			throw new UserNotFound()
 		}
 
@@ -47,29 +47,29 @@ export class UserService {
 			{ name: true, username: true, password: true }
 		)
 
-		if (user) {
+		if (!user) {
 			throw new UserNotFound()
 		}
 
 		return user
 	}
 
-	async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+	async update(currentUser: UserDocument, updateUserDto: UpdateUserDto): Promise<User> {
 		let { username, password } = updateUserDto
 
 		if (username) {
-			const user = await this.userRepository.findOneByUsername(updateUserDto.username)
+			const user = await this.userRepository.findOneByUsername(username)
 
-			if (user && user.username !== username) {
+			if (user && currentUser.username !== username) {
 				throw new DuplicateUsername()
 			}
 		}
 
 		if (password) {
-			password = await argon.hashPassword(updateUserDto.password)
+			updateUserDto.password = await argon.hashPassword(password)
 		}
 
-		return await this.userRepository.updateOne(id, { ...updateUserDto, password })
+		return await this.userRepository.updateOne(currentUser._id, updateUserDto)
 	}
 
 	async delete(id: string): Promise<User> {

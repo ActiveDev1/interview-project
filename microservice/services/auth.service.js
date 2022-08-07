@@ -67,6 +67,20 @@ module.exports = {
 
 				return await this.generateTokens(user)
 			}
+		},
+
+		access: {
+			/** @param {Context} ctx  */
+			async handler(ctx) {
+				const payload = await this.verifyToken(ctx.params)
+				const user = await ctx.call('auth.find', { query: { _id: payload.id } })
+
+				if (_.isEmpty(user)) {
+					throw new MoleculerError('Unauthorized client', 401)
+				}
+
+				return user[0]
+			}
 		}
 	},
 
@@ -93,13 +107,22 @@ module.exports = {
 			return { accessToken, refreshToken }
 		},
 
-		async verifyToken(ctx) {
-			return this.verify(ctx.params.token, JWT_REFRESH_SECRET)
+		async verifyToken({ type, token }) {
+			try {
+				return await this.verify(
+					token,
+					type == 'jwt-access'
+						? process.env.JWT_ACCESS_SECRET
+						: process.env.JWT_REFRESH_SECRET
+				)
+			} catch (error) {
+				throw new MoleculerError('Unauthorized client', 401, 'UNAUTHORIZED_CLIENT', error)
+			}
 		},
 
 		async validateUser(username, password) {
 			const user = (await this.broker.call('auth.find', { query: { username } }))[0]
-			return user && (await argon.verifyPassword(user.password, password)) ? true : false
+			return user && (await argon.verifyPassword(user.password, password)) ? user : false
 		}
 	}
 }
