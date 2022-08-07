@@ -122,7 +122,7 @@ module.exports = {
 
 		async validateUser(username, password) {
 			const user = (await this.broker.call('auth.find', { query: { username } }))[0]
-			return user && (await argon.verifyPassword(user.password, password)) ? true : false
+			return user && (await argon.verifyPassword(user.password, password)) ? user : false
 		}
 	}
 }
