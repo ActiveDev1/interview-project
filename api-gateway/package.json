@@ -13,6 +13,8 @@
 		"start:dev": "cross-env NODE_ENV=development nest start --watch",
 		"start:debug": "cross-env NODE_ENV=development nest start --debug --watch",
 		"start:prod": "cross-env NODE_ENV=prod node dist/main",
+		"seed": "cross-env NODE_ENV=development node dist/seeder",
+		"seed:refresh": "node dist/seeder --refresh",
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
 		"test": "jest --maxWorkers=50%",
 		"test:watch": "jest --watch --maxWorkers=25%",
@@ -40,6 +42,7 @@
 		"mongoose": "^6.5.1",
 		"mongoose-unix-timestamp": "^1.0.6",
 		"nats": "^2.7.1",
+		"nestjs-seeder": "^0.2.0",
 		"reflect-metadata": "^0.1.13",
 		"rimraf": "^3.0.2",
 		"rxjs": "^7.5.6"
