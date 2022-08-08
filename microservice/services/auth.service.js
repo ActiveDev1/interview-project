@@ -5,19 +5,23 @@ const MongooseAdapter = require('moleculer-db-adapter-mongoose')
 const { MoleculerError } = require('moleculer').Errors
 
 const UserModel = require('../models/user.model')
+const config = require('../config')
 const argon = require('../utils/argon2')
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
 const { promisify } = require('util')
 
-const adapter = new MongooseAdapter(process.env.MONGO_URI, {
-	// auth: {
-	// 	user: process.env.MONGO_USERNAME,
-	// 	pass: process.env.MONGO_PASSWORD
-	// },
-	useNewUrlParser: true,
-	useUnifiedTopology: true
-})
+const adapter = new MongooseAdapter(
+	`mongodb://${config.mongodb.host}:${config.mongodb.port}/${config.mongodb.db}`,
+	{
+		// auth: {
+		// 	user: config.mongodb.username,
+		// 	pass: config.mongodb.password
+		// },
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	}
+)
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -97,11 +101,11 @@ module.exports = {
 			}
 
 			const [accessToken, refreshToken] = await Promise.all([
-				this.encode(payload, process.env.JWT_ACCESS_SECRET, {
-					expiresIn: process.env.JWT_ACCESS_EXPIRE
+				this.encode(payload, config.jwt.accessSecret, {
+					expiresIn: config.jwt.accessTokenExpiry
 				}),
-				this.encode(payload, process.env.JWT_REFRESH_SECRET, {
-					expiresIn: process.env.JWT_REFRESH_EXPIRE
+				this.encode(payload, config.jwt.refreshSecret, {
+					expiresIn: config.jwt.refreshTokenExpiry
 				})
 			])
 			return { accessToken, refreshToken }
@@ -111,9 +115,7 @@ module.exports = {
 			try {
 				return await this.verify(
 					token,
-					type == 'jwt-access'
-						? process.env.JWT_ACCESS_SECRET
-						: process.env.JWT_REFRESH_SECRET
+					type == 'jwt-access' ? config.jwt.accessSecret : config.jwt.refreshSecret
 				)
 			} catch (error) {
 				throw new MoleculerError('Unauthorized client', 401, 'UNAUTHORIZED_CLIENT', error)

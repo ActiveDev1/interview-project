@@ -1,9 +1,6 @@
 'use strict'
 
-require('dotenv').config({
-	path: process.env.NODE_ENV === 'production' ? './.env.prod' : './.env.development'
-})
-
+const config = require('./config')
 const os = require('os')
 
 module.exports = {
@@ -11,9 +8,9 @@ module.exports = {
 	nodeID: (process.env.NODEID ? process.env.NODEID + '-' : '') + os.hostname().toLowerCase(),
 	disableBalancer: true,
 	transporter: {
-		type: 'NATS',
+		type: config.transporter.type,
 		options: {
-			servers: process.env.NATS_SERVERS.split(',')
+			servers: config.transporter.servers
 		}
 	},
 	cacher: true,
