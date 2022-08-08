@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+    mongodb:
+        container_name: mongodb
+        image: mongo:5.0.10-focal
+        restart: always
+        ports:
+            - '27017:27017'
+        networks:
+            - backend
+        volumes:
+            - ./mongo/db-data:/data/db
+            - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+        # environment:
+            # MONGO_INITDB_ROOT_USERNAME: 'admin'
+            # MONGO_INITDB_ROOT_PASSWORD: ''
+            # - MONGO_INITDB_ROOT_USERNAME=mahs
+            #   - MONGO_INITDB_ROOT_USERNAME=user
+            #   - MONGO_INITDB_ROOT_PASSWORD=password
+            #   - MONGO_INITDB_DATABASE=test
+
+    nginx:
+        container_name: nginx
+        image: nginx:stable-alpine
+        restart: always
+        network_mode: host
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./nginx/conf.d/:/etc/nginx/conf.d
+
+    nats:
+        container_name: nats
+        image: nats:alpine3.15
+        restart: always
+        ports:
+            - '4222:4222'
+        networks:
+            - backend
+
+    usermanager-dev-service:
+        build:
+            context: ./api-gateway/.
+            target: development
+            dockerfile: ./Dockerfile
+        container_name: usermanager-dev-service
+        image: usermanager-dev-service:latest
+        command: npm run start:debug
+        restart: unless-stopped
+        ports:
+            - 3010:3000
+        networks:
+            - backend
+        depends_on:
+            - mongodb
+        volumes:
+            - ./api-gateway:/usr/src/app
+            - ./api-gateway/node_modules:/usr/src/app/node_modules
+        environment:
+            - MONGO_HOST=mongodb
+            - MONGO_USERNAME=admin
+            - MONGO_PASSWORD=
+            - NATS_SERVER=nats://nats:4222
+
+    usermanager-prod-service:
+        build:
+            context: ./api-gateway/.
+            target: production
+            dockerfile: ./Dockerfile
+        image: usermanager-prod-service:latest
+        command: npm run start:prod
+        restart: always
+        ports:
+            - '3000-3003:3000'
+        networks:
+            - backend
+        depends_on:
+            - mongodb
+        volumes:
+            - ./api-gateway:/usr/src/app
+            - ./api-gateway/node_modules:/usr/src/app/node_modules
+        environment:
+            - MONGO_HOST=mongodb
+            - MONGO_USERNAME=admin
+            - MONGO_PASSWORD=
+            - NATS_SERVER=nats://nats:4222
+
+    microservice-dev:
+        build:
+            context: ./microservice/.
+            target: development
+            dockerfile: ./Dockerfile
+        container_name: microservice-dev
+        image: microservice-dev:latest
+        command: npm run start:dev
+        depends_on:
+            - nats
+        networks:
+            - backend
+        env_file:
+            - ./microservice/.env.development
+        environment:
+            - SERVICES=auth
+            - MONGO_HOST=mongodb
+            - TRANSPORTER_SERVERS=nats://nats:4222
+            
+    microservice-prod:
+        build:
+            context: ./microservice/.
+            target: production
+            dockerfile: ./Dockerfile
+        container_name: microservice-prod
+        image: microservice-prod:latest
+        command: npm run start:prod
+        depends_on:
+            - nats
+        networks:
+            - backend
+        env_file:
+            - ./microservice/.env.prod
+        environment:
+            - SERVICES=auth
+            - MONGO_HOST=mongodb
+            - TRANSPORTER_SERVERS=nats://nats:4222
+
+networks:
+    backend:
+        name: backend
