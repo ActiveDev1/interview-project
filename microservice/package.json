@@ -4,14 +4,10 @@
 	"description": "My Moleculer-based microservices project",
 	"scripts": {
 		"dev": "moleculer-runner --repl --hot services/**/*.service.js",
-		"start": "moleculer-runner",
+		"start:dev": "cross-env NODE_ENV=development moleculer-runner",
+		"start:prod": "cross-env NODE_ENV=production moleculer-runner",
 		"cli": "moleculer connect NATS",
-		"ci": "jest --watch",
-		"test": "jest --coverage",
-		"lint": "eslint services",
-		"dc:up": "docker-compose up --build -d",
-		"dc:logs": "docker-compose logs -f",
-		"dc:down": "docker-compose down"
+		"lint": "eslint services"
 	},
 	"keywords": [
 		"microservices",
@@ -26,7 +22,7 @@
 	},
 	"dependencies": {
 		"argon2": "^0.28.7",
-		"dotenv": "^16.0.1",
+		"cross-env": "^7.0.3",
 		"jsonwebtoken": "^8.5.1",
 		"lodash": "^4.17.21",
 		"moleculer": "^0.14.21",
