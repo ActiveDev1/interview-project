@@ -1,5 +1,9 @@
 'use strict'
 
+require('dotenv').config({
+	path: process.env.NODE_ENV === 'production' ? './.env.prod' : './.env.development'
+})
+
 const config = require('./config')
 const os = require('os')
 

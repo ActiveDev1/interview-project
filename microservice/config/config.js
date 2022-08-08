@@ -6,12 +6,12 @@ module.exports = {
 		port: env.num('MONGO_PORT', 27017),
 		db: env.str('MONGO_DB', 'UserManagement'),
 		username: env.str('MONGO_USERNAME', 'admin'),
-		password: env.str('MONGO_PASSWORD', '')
+		password: env.str('MONGO_PASSWORD', 'oops:)')
 	},
 	jwt: {
-		accessSecret: env.str('JWT_ACCESS_SECRET', 'p40D57&X#4KHm0UI2'),
+		accessSecret: env.str('JWT_ACCESS_SECRET', 'StrongSecretLOL'),
 		accessTokenExpiry: env.str('JWT_ACCESS_EXPIRY', '1d'),
-		refreshSecret: env.str('JWT_REFRESH_SECRET', 'Enn%nF10x3f^6b4Jl'),
+		refreshSecret: env.str('JWT_REFRESH_SECRET', 'StrongRefreshSecretLOL'),
 		refreshTokenExpiry: env.str('JWT_REFRESH_EXPIRY', '30d')
 	},
 	transporter: {

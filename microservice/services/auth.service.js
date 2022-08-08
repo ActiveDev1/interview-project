@@ -11,17 +11,12 @@ const jwt = require('jsonwebtoken')
 const _ = require('lodash')
 const { promisify } = require('util')
 
-const adapter = new MongooseAdapter(
-	`mongodb://${config.mongodb.host}:${config.mongodb.port}/${config.mongodb.db}`,
-	{
-		// auth: {
-		// 	user: config.mongodb.username,
-		// 	pass: config.mongodb.password
-		// },
-		useNewUrlParser: true,
-		useUnifiedTopology: true
-	}
-)
+const adapter = new MongooseAdapter(`mongodb://${config.mongodb.host}:${config.mongodb.port}`, {
+	user: config.mongodb.username,
+	pass: config.mongodb.password,
+	useNewUrlParser: true,
+	useUnifiedTopology: true
+})
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
