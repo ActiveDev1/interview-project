@@ -5,6 +5,7 @@ services:
         container_name: mongodb
         image: mongo:5.0.10-focal
         restart: always
+        command: [--auth]
         ports:
             - '27017:27017'
         networks:
@@ -12,13 +13,6 @@ services:
         volumes:
             - ./mongo/db-data:/data/db
             - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
-        # environment:
-            # MONGO_INITDB_ROOT_USERNAME: 'admin'
-            # MONGO_INITDB_ROOT_PASSWORD: ''
-            # - MONGO_INITDB_ROOT_USERNAME=mahs
-            #   - MONGO_INITDB_ROOT_USERNAME=user
-            #   - MONGO_INITDB_ROOT_PASSWORD=password
-            #   - MONGO_INITDB_DATABASE=test
 
     nginx:
         container_name: nginx
@@ -81,8 +75,6 @@ services:
             - ./api-gateway/node_modules:/usr/src/app/node_modules
         environment:
             - MONGO_HOST=mongodb
-            - MONGO_USERNAME=admin
-            - MONGO_PASSWORD=
             - NATS_SERVER=nats://nats:4222
 
     microservice-dev:
