@@ -10,7 +10,7 @@ import { Response } from './interfaces/response.interface'
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnModuleDestroy {
-	@Client({ transport: Transport.NATS })
+	@Client({ transport: Transport.NATS, options: { servers: process.env.NATS_SERVER } })
 	private readonly client: ClientNats
 	private natsClient: NatsClient
 	private readonly logger = new Logger(NatsService.name)
