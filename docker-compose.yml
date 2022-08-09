@@ -5,7 +5,7 @@ services:
         container_name: mongodb
         image: mongo:5.0.10-focal
         restart: always
-        command: [--auth]
+        # command: [--auth]
         ports:
             - '27017:27017'
         networks:
@@ -23,14 +23,14 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./nginx/conf.d/:/etc/nginx/conf.d
 
-    nats:
-        container_name: nats
-        image: nats:alpine3.15
-        restart: always
-        ports:
-            - '4222:4222'
-        networks:
-            - backend
+    # nats:
+    #     container_name: nats
+    #     image: nats:alpine3.15
+    #     restart: always
+    #     ports:
+    #         - '4222'
+    #     networks:
+    #         - backend
 
     usermanager-dev-service:
         build:
@@ -47,14 +47,15 @@ services:
             - backend
         depends_on:
             - mongodb
+            # - nats
         volumes:
             - ./api-gateway:/usr/src/app
             - ./api-gateway/node_modules:/usr/src/app/node_modules
         environment:
+            - NATS_SERVERS=nats://192.168.1.38:4222 # Use your local ip
             - MONGO_HOST=mongodb
-            - MONGO_USERNAME=admin
-            - MONGO_PASSWORD=
-            - NATS_SERVER=nats://nats:4222
+            # - MONGO_USERNAME=admin
+            # - MONGO_PASSWORD=0!PW*o9TYmnBm9MdUtwKw7AL
 
     usermanager-prod-service:
         build:
@@ -70,12 +71,15 @@ services:
             - backend
         depends_on:
             - mongodb
+            # - nats
         volumes:
             - ./api-gateway:/usr/src/app
             - ./api-gateway/node_modules:/usr/src/app/node_modules
         environment:
+            - NATS_SERVERS=nats://192.168.1.38:4222
             - MONGO_HOST=mongodb
-            - NATS_SERVER=nats://nats:4222
+            # - MONGO_USERNAME=admin
+            # - MONGO_PASSWORD=0!PW*o9TYmnBm9MdUtwKw7AL
 
     microservice-dev:
         build:
@@ -85,16 +89,18 @@ services:
         container_name: microservice-dev
         image: microservice-dev:latest
         command: npm run start:dev
-        depends_on:
-            - nats
+        # depends_on:
+        #     - nats
         networks:
             - backend
         env_file:
             - ./microservice/.env.development
         environment:
             - SERVICES=auth
+            - TRANSPORTER_SERVERS=nats://192.168.1.38:4222
             - MONGO_HOST=mongodb
-            - TRANSPORTER_SERVERS=nats://nats:4222
+            # - MONGO_USERNAME=admin
+            # - MONGO_PASSWORD=0!PW*o9TYmnBm9MdUtwKw7AL
             
     microservice-prod:
         build:
@@ -104,8 +110,8 @@ services:
         container_name: microservice-prod
         image: microservice-prod:latest
         command: npm run start:prod
-        depends_on:
-            - nats
+        # depends_on:
+        #     - nats
         networks:
             - backend
         env_file:
@@ -113,7 +119,9 @@ services:
         environment:
             - SERVICES=auth
             - MONGO_HOST=mongodb
-            - TRANSPORTER_SERVERS=nats://nats:4222
+            - TRANSPORTER_SERVERS=nats://192.168.1.38:4222
+            # - MONGO_USERNAME=admin
+            # - MONGO_PASSWORD=0!PW*o9TYmnBm9MdUtwKw7AL
 
 networks:
     backend:

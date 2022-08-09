@@ -6,7 +6,7 @@ COPY package*.json ./
 
 COPY . .
 
-RUN npm ci
+RUN npm ci && npm audit fix
 
 FROM node:lts-slim as production
 
@@ -16,7 +16,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev && npm audit fix
 
 COPY . .
 
