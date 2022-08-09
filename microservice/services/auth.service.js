@@ -1,22 +1,13 @@
 'use strict'
 
-const DbService = require('moleculer-db')
-const MongooseAdapter = require('moleculer-db-adapter-mongoose')
 const { MoleculerError } = require('moleculer').Errors
 
-const UserModel = require('../models/user.model')
 const config = require('../config')
+const userDB = require('../db/user.db')
 const argon = require('../utils/argon2')
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
 const { promisify } = require('util')
-
-const adapter = new MongooseAdapter(`mongodb://${config.mongodb.host}:${config.mongodb.port}`, {
-	user: config.mongodb.username,
-	pass: config.mongodb.password,
-	useNewUrlParser: true,
-	useUnifiedTopology: true
-})
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -25,30 +16,20 @@ const adapter = new MongooseAdapter(`mongodb://${config.mongodb.host}:${config.m
 module.exports = {
 	name: 'auth',
 
-	mixins: [DbService],
-
-	adapter,
-
-	model: UserModel,
-
 	actions: {
 		signup: {
 			/** @param {Context} ctx  */
 			async handler(ctx) {
 				const { name, username, password } = ctx.params
 
-				const user = await ctx.call('auth.find', { query: { username } })
+				const user = await userDB.findOneByUsername(username)
 
 				if (!_.isEmpty(user)) {
 					throw new MoleculerError('Username already exists', 422)
 				}
 
 				const hashPassword = await argon.hashPassword(password)
-				const newUser = await ctx.call('auth.create', {
-					name,
-					username,
-					password: hashPassword
-				})
+				const newUser = await userDB.create({ name, username, password: hashPassword })
 
 				return await this.generateTokens(newUser)
 			}
@@ -72,7 +53,7 @@ module.exports = {
 			/** @param {Context} ctx  */
 			async handler(ctx) {
 				const payload = await this.verifyToken(ctx.params)
-				const user = await ctx.call('auth.find', { query: { _id: payload.id } })
+				const user = await userDB.findById(payload.id)
 
 				if (_.isEmpty(user)) {
 					throw new MoleculerError('Unauthorized client', 401)
@@ -118,7 +99,7 @@ module.exports = {
 		},
 
 		async validateUser(username, password) {
-			const user = (await this.broker.call('auth.find', { query: { username } }))[0]
+			const user = await userDB.findOneByUsername(username)
 			return user && (await argon.verifyPassword(user.password, password)) ? user : false
 		}
 	}
