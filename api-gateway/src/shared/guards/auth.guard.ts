@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, mixin, Type } from '@nestjs/
 import { Reflector } from '@nestjs/core'
 import { JwtStrategy, strategyType } from '../../modules/auth/strategies/jwt.strategy'
 import { NatsService } from '../../modules/services/nats/nats.service'
+import { IS_PUBLIC } from '../decorators/public.decorator'
 
 export const AuthGuard = (type: strategyType = 'jwt-access'): Type<CanActivate> => {
 	@Injectable()
@@ -11,7 +12,7 @@ export const AuthGuard = (type: strategyType = 'jwt-access'): Type<CanActivate> 
 		}
 
 		async canActivate(context: ExecutionContext) {
-			const isPublic = this.reflector.get<boolean>('isPublic', context.getHandler())
+			const isPublic = this.reflector.get<boolean>(IS_PUBLIC, context.getHandler())
 
 			if (isPublic) {
 				return true
