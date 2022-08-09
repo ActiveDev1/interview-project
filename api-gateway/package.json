@@ -38,6 +38,7 @@
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.13.2",
 		"cross-env": "^7.0.3",
+		"fastify": "^4.4.0",
 		"lodash": "^4.17.21",
 		"mongoose": "^6.5.1",
 		"mongoose-unix-timestamp": "^1.0.6",
