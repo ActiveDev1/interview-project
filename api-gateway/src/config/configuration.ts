@@ -14,6 +14,10 @@ export interface DatabaseConfig {
 	uri: string
 }
 
+export interface NatsConfig {
+	servers: string | string[]
+}
+
 export default () => ({
 	server: {
 		restApi: {
@@ -32,5 +36,8 @@ export default () => ({
 			password: process.env.MONGO_PASSWORD,
 			uri: process.env.MONGO_URI
 		} as DatabaseConfig
-	}
+	},
+	nats: {
+		servers: process.env.NATS_SERVERS
+	} as NatsConfig
 })

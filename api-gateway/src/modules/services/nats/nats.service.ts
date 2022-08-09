@@ -1,5 +1,12 @@
-import { HttpException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
-import { Client, ClientNats, Transport } from '@nestjs/microservices'
+import {
+	HttpException,
+	Inject,
+	Injectable,
+	Logger,
+	OnModuleDestroy,
+	OnModuleInit
+} from '@nestjs/common'
+import { ClientNats } from '@nestjs/microservices'
 import { Client as NatsClient, NatsMsg } from '@nestjs/microservices/external/nats-client.interface'
 import * as _ from 'lodash'
 import { createInbox } from 'nats'
@@ -10,12 +17,12 @@ import { Response } from './interfaces/response.interface'
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnModuleDestroy {
-	@Client({ transport: Transport.NATS, options: { servers: process.env.NATS_SERVER } })
-	private readonly client: ClientNats
 	private natsClient: NatsClient
 	private readonly logger = new Logger(NatsService.name)
 	private readonly defaultRequestOption: RequestOptions = { noMux: true, timeout: 2000 }
 	private readonly subjectPrefix = 'MOL'
+
+	constructor(@Inject('NATS_SERVICE') private readonly client: ClientNats) {}
 
 	async onModuleInit() {
 		await this.client.connect()
