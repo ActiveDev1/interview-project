@@ -61,6 +61,14 @@ module.exports = {
 
 				return user
 			}
+		},
+
+		refresh: {
+			/** @param {Context} ctx  */
+			async handler(ctx) {
+				const { id: _id, role } = ctx.params
+				return await this.generateTokens({ _id, role })
+			}
 		}
 	},
 

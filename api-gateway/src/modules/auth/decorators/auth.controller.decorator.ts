@@ -1,11 +1,9 @@
 import { applyDecorators, UseGuards } from '@nestjs/common'
 import {
 	ApiBearerAuth,
-	ApiConflictResponse,
 	ApiCreatedResponse,
 	ApiForbiddenResponse,
-	ApiNotAcceptableResponse,
-	ApiOkResponse
+	ApiNotAcceptableResponse
 } from '@nestjs/swagger'
 import { Role } from 'src/shared/decorators/roles.decorator'
 import { AuthGuard } from 'src/shared/guards/auth.guard'
@@ -34,5 +32,13 @@ export function SigninApi() {
 	return applyDecorators(
 		ApiCreatedResponse({ description: 'Login successful', type: Tokens }),
 		ApiForbiddenResponse({ description: 'Username and or password is incorrect' })
+	)
+}
+
+export function RefreshTokenApi() {
+	return applyDecorators(
+		UseGuards(AuthGuard('jwt-refresh')),
+		ApiBearerAuth('refresh-token'),
+		ApiCreatedResponse({ description: 'Access & Refresh tokens', type: Tokens })
 	)
 }

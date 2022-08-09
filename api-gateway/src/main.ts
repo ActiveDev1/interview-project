@@ -43,7 +43,7 @@ async function bootstrap() {
 			.setVersion('1.0')
 			.addBearerAuth(
 				{
-					description: `Please enter token in following format: Bearer <JWT>`,
+					description: `Please enter access token in following format: Bearer <JWT>`,
 					name: 'Authorization',
 					bearerFormat: 'Bearer',
 					scheme: 'Bearer',
@@ -51,6 +51,17 @@ async function bootstrap() {
 					in: 'Header'
 				},
 				'access-token'
+			)
+			.addBearerAuth(
+				{
+					description: `Please enter refresh token in following format: Bearer <JWT>`,
+					name: 'Authorization',
+					bearerFormat: 'Bearer',
+					scheme: 'Bearer',
+					type: 'http',
+					in: 'Header'
+				},
+				'refresh-token'
 			)
 			.build()
 		const document = SwaggerModule.createDocument(app, configDocument)
