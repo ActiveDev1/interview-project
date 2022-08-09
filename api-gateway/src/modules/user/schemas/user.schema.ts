@@ -17,7 +17,7 @@ class User implements IUser {
 	@Prop({ unique: true, required: true })
 	username: string
 
-	@Factory((faker) => faker.internet.password())
+	@Factory('PassGodratmand')
 	@Prop({ required: true, select: false })
 	password: string
 

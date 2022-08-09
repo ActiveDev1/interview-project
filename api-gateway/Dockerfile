@@ -12,7 +12,6 @@ RUN npm install glob rimraf
 RUN npm ci && npm audit fix
 
 RUN npm run build
-# RUN MONGO_HOST=mongodb npm run seed
 
 FROM node:lts-slim as production
 

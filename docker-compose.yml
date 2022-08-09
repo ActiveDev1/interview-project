@@ -39,7 +39,8 @@ services:
             dockerfile: ./Dockerfile
         container_name: usermanager-dev-service
         image: usermanager-dev-service:latest
-        command: npm run start:debug
+        command: >
+                bash -c "npm run seed && npm run start:debug"
         restart: unless-stopped
         ports:
             - 3010:3000
