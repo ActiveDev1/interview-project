@@ -1,7 +1,7 @@
 const User = require('../models/user.model')
 
-async function create({ name, username, password }) {
-	const user = new User({ name, username, password })
+async function create(data) {
+	const user = new User(data)
 	return await user.save()
 }
 

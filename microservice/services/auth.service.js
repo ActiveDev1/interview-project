@@ -20,16 +20,16 @@ module.exports = {
 		signup: {
 			/** @param {Context} ctx  */
 			async handler(ctx) {
-				const { name, username, password } = ctx.params
+				let { username, password } = ctx.params
 
 				const user = await userDB.findOneByUsername(username)
 
-				if (!_.isEmpty(user)) {
+				if (user) {
 					throw new MoleculerError('Username already exists', 422)
 				}
 
 				const hashPassword = await argon.hashPassword(password)
-				const newUser = await userDB.create({ name, username, password: hashPassword })
+				const newUser = await userDB.create({ ...ctx.params, password: hashPassword })
 
 				return await this.generateTokens(newUser)
 			}
@@ -55,11 +55,11 @@ module.exports = {
 				const payload = await this.verifyToken(ctx.params)
 				const user = await userDB.findById(payload.id)
 
-				if (_.isEmpty(user)) {
+				if (!user) {
 					throw new MoleculerError('Unauthorized client', 401)
 				}
 
-				return user[0]
+				return user
 			}
 		}
 	},
