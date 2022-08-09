@@ -7,6 +7,8 @@ require('dotenv').config({
 const config = require('./config')
 const os = require('os')
 
+require('./db/mongo-connector')()
+
 module.exports = {
 	namespace: 'dev',
 	nodeID: (process.env.NODEID ? process.env.NODEID + '-' : '') + os.hostname().toLowerCase(),
