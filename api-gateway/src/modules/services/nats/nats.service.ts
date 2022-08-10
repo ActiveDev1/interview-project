@@ -20,12 +20,12 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 	private natsClient: NatsClient
 	private readonly logger = new Logger(NatsService.name)
 	private readonly defaultRequestOption: RequestOptions = { noMux: true, timeout: 2000 }
-	private readonly subjectPrefix = 'MOL'
+	private readonly namespace = process.env.MOL_NAMESPACE
+	private readonly subjectPrefix = 'MOL' + (this.namespace ? `-${this.namespace}` : '')
 
 	constructor(@Inject('NATS_SERVICE') private readonly client: ClientNats) {}
 
 	async onModuleInit() {
-		await this.client.connect()
 		this.natsClient = await this.client.createClient()
 		this.logger.log('Nats client connected')
 	}
@@ -39,12 +39,9 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 		request: Request<TInput>,
 		options?: RequestOptions
 	): Promise<TResult> {
-		const subject =
-			this.subjectPrefix +
-			(request.namespace ? `-${request.namespace}` : '') +
-			`.REQB.${request.action}`
+		const subject = this.subjectPrefix + '.REQB.' + request.action
 		const { dataBuffer, inbox } = this.getRequestData<TInput>(request)
-		const opts = this.getDefaultOptions(options, { inbox, namespace: request.namespace })
+		const opts = this.getDefaultOptions(options, inbox)
 
 		const reply = await this.natsClient.request(subject, dataBuffer, opts)
 
@@ -85,17 +82,13 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 		return resposne.data ? resposne.data : null
 	}
 
-	private getDefaultOptions(
-		options: RequestOptions,
-		{ inbox, namespace }: { inbox: string; namespace: string }
-	): RequestOptions {
+	private getDefaultOptions(options: RequestOptions, inbox: string): RequestOptions {
 		if (!options) {
 			options = { ...this.defaultRequestOption }
 		}
 
 		if (_.isEmpty(options?.reply)) {
-			const reply = this.subjectPrefix + (namespace ? `-${namespace}` : '') + `.RES.${inbox}`
-
+			const reply = this.subjectPrefix + '.RES.' + inbox
 			options.reply = reply
 		}
 
